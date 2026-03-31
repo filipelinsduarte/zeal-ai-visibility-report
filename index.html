@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zeal — AI Visibility Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#18181b;--ink2:#3f3f46;--ink3:#71717a;--ink4:#a1a1aa;
+  --paper:#ffffff;--paper2:#fafaf9;--paper3:#f4f4f5;--rule:#e4e4e7;
+  --accent:#9F64FF;--accent-bg:#f5f0ff;--accent-bd:#d8c5ff;--accent-dark:#6d4aad;
+  --warn:#ea580c;--warn-bg:#fff7ed;--warn-bd:#fed7aa;
+  --ok:#16a34a;--ok-bg:#f0fdf4;--ok-bd:#bbf7d0;
+  --red:#dc2626;--red-bg:#fef2f2;--red-bd:#fecaca;
+  --blue:#2563eb;--blue-bg:#eff6ff;
+}
+html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#fff}
+.reveal-viewport,.reveal{width:100%!important;height:100%!important;background:#fff!important}
+.reveal .backgrounds,.reveal .slide-background,.reveal .slide-background-content{background:#fff!important}
+.reveal .slides{width:100%!important;height:100%!important;position:absolute!important;top:0!important;left:0!important;transform:none!important}
+.reveal .slides section{position:absolute!important;top:0!important;left:0!important;width:100%!important;height:100%!important;padding:0!important;background:#fff!important;display:flex!important;flex-direction:column!important;text-align:left!important}
+.reveal .slides section *{text-align:left}
+.reveal .progress{color:var(--accent);height:3px}
+.reveal .controls button{color:var(--accent)}
+.reveal .slide-number{font-family:'DM Mono',monospace;font-size:11px;color:var(--ink4);background:none;letter-spacing:.06em}
+.reveal .slides,.reveal .slides *{font-family:'DM Sans',sans-serif;color:var(--ink)}
+.reveal h1,.reveal h2,.reveal h3,.reveal h4{text-transform:none;line-height:1.15;margin:0;font-weight:700;text-align:left}
+.s{width:100vw;height:100vh;padding:5vh 5vw 4.5vh;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.stripe{position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent)}
+.snum{position:absolute;top:4.5vh;right:5vw;font-family:'DM Mono',monospace;font-size:clamp(11px,1.4vh,15px);color:var(--ink4);letter-spacing:.06em}
+.tag{display:inline-block;font-size:clamp(9px,1.2vh,12px);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:3px;padding:3px 10px;margin-bottom:1.2vh}
+.reveal h2{font-size:clamp(24px,4.5vh,48px);letter-spacing:-.03em;margin-bottom:2vh}
+.reveal h1{font-size:clamp(40px,9vh,88px);letter-spacing:-.04em}
+.sub{font-size:clamp(13px,1.9vh,19px);color:var(--ink3);line-height:1.6;max-width:60ch}
+/* Metric cards */
+.metrics{display:grid;gap:clamp(8px,1.2vw,16px);flex-shrink:0}
+.metrics.m4{grid-template-columns:repeat(4,1fr)}
+.metrics.m5{grid-template-columns:repeat(5,1fr)}
+.metrics.m3{grid-template-columns:repeat(3,1fr)}
+.mc{background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:clamp(14px,2.2vh,26px) clamp(12px,1.8vw,22px);display:flex;flex-direction:column;gap:4px}
+.mc .ml{font-size:clamp(9px,1.2vh,12px);font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4)}
+.mc .mv{font-family:'DM Mono',monospace;font-size:clamp(28px,5.5vh,56px);font-weight:500;letter-spacing:-.04em;line-height:1}
+.mc .md{font-size:clamp(10px,1.4vh,14px);color:var(--ink3);line-height:1.4}
+.mc.hi{border-color:var(--accent-bd);background:var(--accent-bg)}
+.mc.hi .mv{color:var(--accent)}
+.mc.lo{border-color:var(--red-bd);background:var(--red-bg)}
+.mc.lo .mv{color:var(--red)}
+.mc.ok{border-color:var(--ok-bd);background:var(--ok-bg)}
+.mc.ok .mv{color:var(--ok)}
+.mc.warn{border-color:var(--warn-bd);background:var(--warn-bg)}
+.mc.warn .mv{color:var(--warn)}
+/* Favicon helper */
+.fav{width:clamp(16px,2.2vh,22px);height:clamp(16px,2.2vh,22px);border-radius:4px;vertical-align:middle;margin-right:6px;flex-shrink:0}
+.fav-sm{width:clamp(14px,1.8vh,18px);height:clamp(14px,1.8vh,18px);border-radius:3px;vertical-align:middle;margin-right:5px}
+/* Bar chart */
+.hbar{display:grid;grid-template-columns:clamp(100px,14vw,180px) 1fr auto;gap:12px;align-items:center;padding:clamp(8px,1.4vh,16px) 0;border-bottom:1px solid var(--rule)}
+.hbar:last-child{border-bottom:none}
+.hbar-label{font-size:clamp(13px,1.9vh,19px);font-weight:600;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.hbar-track{height:clamp(24px,3.6vh,40px);background:var(--paper3);border-radius:4px;overflow:hidden}
+.hbar-fill{height:100%;border-radius:4px;min-width:2px}
+.hbar-val{font-family:'DM Mono',monospace;font-size:clamp(15px,2.2vh,22px);font-weight:600;white-space:nowrap}
+/* Grid heatmap */
+.heatmap{display:grid;gap:0;flex:1;min-height:0}
+.hm-cell{display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:clamp(11px,1.5vh,15px);font-weight:600;border:1px solid var(--paper);border-radius:3px}
+.hm-head{font-family:'DM Sans',sans-serif;font-size:clamp(9px,1.2vh,12px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);display:flex;align-items:center;justify-content:center}
+.hm-row-label{font-size:clamp(10px,1.4vh,14px);color:var(--ink2);font-weight:500;display:flex;align-items:center;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hm-0{background:var(--red-bg);color:var(--red)}
+.hm-low{background:var(--warn-bg);color:var(--warn)}
+.hm-mid{background:var(--accent-bg);color:var(--accent)}
+.hm-high{background:var(--ok-bg);color:var(--ok)}
+/* Callout */
+.co{padding:clamp(10px,1.5vh,16px) clamp(12px,1.8vw,20px);font-size:clamp(12px,1.7vh,16px);line-height:1.6;border-radius:6px;flex-shrink:0}
+.co.a{background:var(--accent-bg);color:var(--ink2)}
+.co.r{background:var(--red-bg);color:var(--ink2)}
+.co.w{background:var(--warn-bg);color:var(--ink2)}
+.co.g{background:var(--ok-bg);color:var(--ink2)}
+.co strong{color:var(--ink);font-weight:600}
+/* Two-col */
+.two{display:grid;grid-template-columns:1fr 1fr;gap:2.5vw;flex:1;min-height:0}
+.two>div{display:flex;flex-direction:column}
+/* Source rows */
+.srow{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center;padding:clamp(6px,1.2vh,12px) 0;border-bottom:1px solid var(--rule)}
+.srow:last-child{border-bottom:none}
+.srow-name{font-size:clamp(12px,1.6vh,16px);font-weight:500;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.srow-count{font-family:'DM Mono',monospace;font-size:clamp(12px,1.6vh,16px);font-weight:600;color:var(--accent)}
+.srow-models{font-size:clamp(9px,1.1vh,11px);color:var(--ink4);font-weight:600;letter-spacing:.04em}
+/* Prompt list */
+.plist{display:flex;flex-direction:column;flex:1;justify-content:space-evenly}
+.prow{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;padding:clamp(6px,1.1vh,11px) 0;border-bottom:1px solid var(--rule)}
+.prow:last-child{border-bottom:none}
+.prow-q{font-size:clamp(11px,1.5vh,15px);color:var(--ink2);font-weight:500}
+.prow-s{font-family:'DM Mono',monospace;font-size:clamp(11px,1.5vh,15px);font-weight:700;padding:2px 8px;border-radius:3px}
+/* Action cards */
+.acards{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.2vw,16px);flex:1;min-height:0}
+.acard{background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:clamp(12px,1.8vh,20px) clamp(12px,1.6vw,18px);display:flex;flex-direction:column}
+.acard-n{font-family:'DM Mono',monospace;font-size:clamp(28px,4.5vh,48px);font-weight:400;color:var(--accent-bd);margin-bottom:1vh}
+.acard h4{font-size:clamp(13px,1.8vh,17px);font-weight:700;margin-bottom:.6vh}
+.acard p{font-size:clamp(11px,1.5vh,15px);color:var(--ink3);line-height:1.5;flex:1}
+.acard .atag{margin-top:auto;padding-top:1vh;font-family:'DM Mono',monospace;font-size:clamp(9px,1.2vh,12px);color:var(--ink4)}
+/* Donut chart via conic-gradient */
+.donut-wrap{display:flex;align-items:center;gap:clamp(16px,3vw,32px);justify-content:center;flex:1}
+.donut{width:clamp(120px,22vh,220px);height:clamp(120px,22vh,220px);border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.donut-inner{position:absolute;width:65%;height:65%;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;flex-direction:column}
+.donut-inner .dv{font-family:'DM Mono',monospace;font-size:clamp(24px,4.5vh,44px);font-weight:500;letter-spacing:-.04em;line-height:1}
+.donut-inner .dl{font-size:clamp(10px,1.3vh,13px);color:var(--ink4);font-weight:600;text-transform:uppercase;letter-spacing:.08em}
+.donut-legend{display:flex;flex-direction:column;gap:clamp(6px,1.2vh,14px)}
+.donut-legend-item{display:flex;align-items:center;gap:8px;font-size:clamp(12px,1.7vh,17px);color:var(--ink2);font-weight:500}
+.donut-legend-item .ldot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.donut-legend-item .lval{font-family:'DM Mono',monospace;font-weight:600;margin-left:auto;padding-left:12px}
+/* Pill chips */
+.pill{display:inline-block;border-radius:3px;padding:2px 8px;font-size:clamp(9px,1.2vh,12px);font-weight:700;letter-spacing:.04em}
+.pill-a{background:var(--accent-bg);color:var(--accent)}.pill-r{background:var(--red-bg);color:var(--red)}.pill-g{background:var(--ok-bg);color:var(--ok)}.pill-w{background:var(--warn-bg);color:var(--warn)}.pill-m{background:var(--paper3);color:var(--ink4)}
+</style>
+</head>
+<body><div class="reveal"><div class="slides">
+
+<section><div class="s">
+<div class="stripe"></div><div class="snum">01 / 07</div>
+<div style="margin:auto 0;padding-bottom:clamp(16px,3vh,36px)">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:2vh">
+    <img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=64" class="fav" alt="">
+    <span class="tag">AI Visibility Intelligence</span>
+  </div>
+  <h1 style="margin-bottom:2vh">How AI Sees<br><span style="color:var(--accent)">Zeal</span></h1>
+  <p class="sub">Across 87 conversations with ChatGPT, Gemini, Perplexity, Google AI Overviews, and Google AI Mode, we tracked every time an AI mentioned Zeal, every competitor it recommended instead, and every source it cited. This is what we found.</p>
+</div>
+<div style="display:flex;gap:0;border-top:1px solid var(--rule);padding-top:2vh">
+  <div style="flex:1"><span style="font-size:clamp(9px,1.2vh,12px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);display:block;margin-bottom:3px">Brand</span><span style="font-size:clamp(13px,1.9vh,18px);color:var(--ink2)">Zeal (getzeal.io)</span></div>
+  <div style="flex:1"><span style="font-size:clamp(9px,1.2vh,12px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);display:block;margin-bottom:3px">AI Models</span><span style="font-size:clamp(13px,1.9vh,18px);color:var(--ink2)">5 platforms tracked</span></div>
+  <div style="flex:1"><span style="font-size:clamp(9px,1.2vh,12px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);display:block;margin-bottom:3px">Prompts</span><span style="font-size:clamp(13px,1.9vh,18px);color:var(--ink2)">19 buyer questions</span></div>
+  <div style="flex:1"><span style="font-size:clamp(9px,1.2vh,12px);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);display:block;margin-bottom:3px">Report Date</span><span style="font-size:clamp(13px,1.9vh,18px);color:var(--ink2)">31 March 2026</span></div>
+</div>
+</div></section>
+
+<section><div class="s">
+<div class="stripe"></div><div class="snum">02 / 07</div>
+<span class="tag">The Scorecard</span>
+<h2>Zeal's AI Visibility at a Glance</h2>
+<div class="metrics m3" style="margin-bottom:1.5vh">
+  <div class="mc lo"><div class="ml">Visibility Score</div><div class="mv">1</div><div class="md">out of 100. Ranked 5th of 5 tracked brands.</div></div>
+  <div class="mc lo"><div class="ml">Prompt Coverage</div><div class="mv">3/19</div><div class="md">Zeal mentioned in only 3 of 19 tracked buyer questions.</div></div>
+  <div class="mc ok"><div class="ml">Biggest Opportunity</div><div class="mv" style="font-size:clamp(14px,2.2vh,24px);letter-spacing:-.01em;line-height:1.2">Content</div><div class="md">Publish product pages, blog posts, and get on Reddit and YouTube. AI cites these sources but has nothing from Zeal.</div></div>
+</div>
+<div class="two" style="flex:1;min-height:0">
+  <div>
+    <div class="donut-wrap">
+      <div class="donut" style="background:conic-gradient(var(--red) 0deg 310deg, var(--accent) 310deg 330deg, var(--ok) 330deg 360deg)">
+        <div class="donut-inner"><div class="dv" style="color:var(--red)">84%</div><div class="dl">Invisible</div></div>
+      </div>
+      <div class="donut-legend">
+        <div class="donut-legend-item"><span class="ldot" style="background:var(--red)"></span>Zero score (16 prompts)<span class="lval" style="color:var(--red)">84%</span></div>
+        <div class="donut-legend-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+          <div style="display:flex;align-items:center;gap:8px;width:100%"><span class="ldot" style="background:var(--accent)"></span>Weak mention (1 prompt)<span class="lval" style="color:var(--accent)">5%</span></div>
+          <div style="padding-left:18px;font-size:clamp(9px,1.15vh,12px);color:var(--ink4);line-height:1.3"><img src="https://www.google.com/s2/favicons?domain=gemini.google.com&sz=16" style="width:11px;height:11px;vertical-align:middle;margin-right:2px">Gemini: ranked 10th of 10 brands, score 10</div>
+        </div>
+        <div class="donut-legend-item" style="flex-direction:column;align-items:flex-start;gap:2px">
+          <div style="display:flex;align-items:center;gap:8px;width:100%"><span class="ldot" style="background:var(--ok)"></span>Strong mention (2 prompts)<span class="lval" style="color:var(--ok)">11%</span></div>
+          <div style="padding-left:18px;font-size:clamp(9px,1.15vh,12px);color:var(--ink4);line-height:1.3"><img src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=16" style="width:11px;height:11px;vertical-align:middle;margin-right:2px">ChatGPT: ranked 3rd, score 67<br><img src="https://www.google.com/s2/favicons?domain=google.com&sz=16" style="width:11px;height:11px;vertical-align:middle;margin-right:2px">Google AIO: ranked 4th, score 50</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="justify-content:center;gap:1.2vh">
+    <div class="co a"><strong>Translation:</strong> When a business owner asks an AI tool for loyalty software, there is an 84% chance Zeal won't be mentioned at all. Square, Clover, Lightspeed, or Toast will be recommended instead.</div>
+    <div class="co r"><strong>87 AI conversations analysed</strong> across 5 platforms (ChatGPT, Gemini, Google AIO, Google AI Mode, Perplexity). Only 3 included Zeal in the response.</div>
+    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:6px;padding:clamp(8px,1.2vh,14px) clamp(10px,1.5vw,18px)">
+      <div style="font-size:clamp(8px,1vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);margin-bottom:4px">How the Visibility Score Works</div>
+      <p style="font-size:clamp(10px,1.3vh,14px);color:var(--ink3);line-height:1.5;margin:0">Each tracked prompt is sent to 5 AI models. When a brand is mentioned, it receives a score based on its rank position (rank 1 = 100, rank 3 = 67, rank 10 = 10). The overall visibility score combines frequency of mentions with rank quality across all prompts and models.</p>
+    </div>
+  </div>
+</div>
+</div></section>
+
+<section><div class="s">
+<div class="stripe"></div><div class="snum">03 / 07</div>
+<span class="tag">Competitor Landscape</span>
+<h2>Who AI Recommends <span style="color:var(--accent)">Instead of Zeal</span></h2>
+<!-- Main content: chart + insights -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5vw;flex:1;min-height:0">
+  <div style="display:flex;flex-direction:column;justify-content:center">
+    <div class="hbar" style="padding:clamp(8px,1.5vh,18px) 0"><span class="hbar-label"><img src="https://www.google.com/s2/favicons?domain=squareup.com&sz=32" class="fav-sm">Square</span><div class="hbar-track"><div class="hbar-fill" style="width:100%;background:var(--accent)"></div></div><span class="hbar-val" style="color:var(--accent)">33</span></div>
+    <div class="hbar" style="padding:clamp(8px,1.5vh,18px) 0"><span class="hbar-label"><img src="https://www.google.com/s2/favicons?domain=clover.com&sz=32" class="fav-sm">Clover</span><div class="hbar-track"><div class="hbar-fill" style="width:27%;background:var(--accent-dark)"></div></div><span class="hbar-val" style="color:var(--accent-dark)">9</span></div>
+    <div class="hbar" style="padding:clamp(8px,1.5vh,18px) 0"><span class="hbar-label"><img src="https://www.google.com/s2/favicons?domain=lightspeedhq.com&sz=32" class="fav-sm">Lightspeed</span><div class="hbar-track"><div class="hbar-fill" style="width:21%;background:var(--warn)"></div></div><span class="hbar-val" style="color:var(--warn)">7</span></div>
+    <div class="hbar" style="padding:clamp(8px,1.5vh,18px) 0"><span class="hbar-label"><img src="https://www.google.com/s2/favicons?domain=toast.com&sz=32" class="fav-sm">Toast</span><div class="hbar-track"><div class="hbar-fill" style="width:9%;background:var(--warn)"></div></div><span class="hbar-val" style="color:var(--warn)">3</span></div>
+    <div class="hbar" style="padding:clamp(8px,1.5vh,18px) 0;border-bottom:none"><span class="hbar-label" style="color:var(--red)"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=32" class="fav-sm"><strong>Zeal</strong></span><div class="hbar-track"><div class="hbar-fill" style="width:3%;background:var(--red)"></div></div><span class="hbar-val" style="color:var(--red)">1</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;justify-content:center;gap:clamp(10px,1.5vh,18px)">
+    <div class="co r" style="font-size:clamp(12px,1.7vh,17px)"><strong>Zeal ranks last</strong>, but Square only scores 33, not 100. No brand dominates AI recommendations in this space yet. The window to establish presence is open.</div>
+    <div class="co a" style="font-size:clamp(12px,1.7vh,17px)"><strong>Square is mentioned in 17 of 19 prompts.</strong> Zeal is mentioned in 3. The difference isn't product quality: Square has hundreds of indexed pages about POS and loyalty. Zeal has almost none.</div>
+  </div>
+</div>
+<!-- Other brands: single compact row -->
+<div style="flex-shrink:0;padding-top:clamp(8px,1.2vh,14px);border-top:1px solid var(--rule);margin-top:clamp(8px,1.2vh,14px)">
+  <div style="display:flex;align-items:center;flex-wrap:wrap;gap:clamp(8px,1.2vw,16px)">
+    <span style="font-size:clamp(9px,1.1vh,12px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);white-space:nowrap">Other brands mentioned:</span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=shopify.com&sz=16" style="width:13px;height:13px;border-radius:2px"><strong>Shopify</strong> <span style="font-family:'DM Mono',monospace;color:var(--accent);font-weight:600;font-size:clamp(9px,1.1vh,12px)">15x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=nector.io&sz=16" style="width:13px;height:13px;border-radius:2px"><strong>Nector</strong> <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">6x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=yotpo.com&sz=16" style="width:13px;height:13px;border-radius:2px">Yotpo <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">4x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=verifone.com&sz=16" style="width:13px;height:13px;border-radius:2px">Verifone <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">4x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=16" style="width:13px;height:13px;border-radius:2px">Salesforce <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">4x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=loyaltylion.com&sz=16" style="width:13px;height:13px;border-radius:2px">LoyaltyLion <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">4x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=16" style="width:13px;height:13px;border-radius:2px">HubSpot <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">3x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=stripe.com&sz=16" style="width:13px;height:13px;border-radius:2px">Stripe <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">3x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=smile.io&sz=16" style="width:13px;height:13px;border-radius:2px">Smile.io <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">3x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=ingenico.com&sz=16" style="width:13px;height:13px;border-radius:2px">Ingenico <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">3x</span></span>
+    <span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(10px,1.3vh,14px);color:var(--ink2)"><img src="https://www.google.com/s2/favicons?domain=stampme.com&sz=16" style="width:13px;height:13px;border-radius:2px">Stamp Me <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(9px,1.1vh,12px)">3x</span></span>
+  </div>
+</div>
+</div></section>
+
+<section><div class="s" style="padding:3.5vh 4.5vw 3vh">
+<div class="stripe"></div><div class="snum">04 / 07</div>
+<span class="tag">Platform Heatmap</span>
+<h2 style="margin-bottom:1vh">Who Gets Mentioned, <span style="color:var(--accent)">Model by Model</span></h2>
+<p style="font-size:clamp(9px,1.15vh,12px);color:var(--ink3);margin-bottom:.5vh">&#x2713; = mentioned &nbsp; &#x2715; = not mentioned &nbsp;&nbsp;|&nbsp;&nbsp; <img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:2px"><span style="font-weight:600;color:var(--ink2)">Zeal</span> <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(8px,1vh,11px)">3x</span> &nbsp;&nbsp;&nbsp; <img src="https://www.google.com/s2/favicons?domain=squareup.com&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:2px"><span style="font-weight:600;color:var(--ink2)">Square</span> <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(8px,1vh,11px)">35x</span> &nbsp;&nbsp;&nbsp; <img src="https://www.google.com/s2/favicons?domain=clover.com&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:2px"><span style="font-weight:600;color:var(--ink2)">Clover</span> <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(8px,1vh,11px)">12x</span> &nbsp;&nbsp;&nbsp; <img src="https://www.google.com/s2/favicons?domain=lightspeedhq.com&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:2px"><span style="font-weight:600;color:var(--ink2)">Lightspeed</span> <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(8px,1vh,11px)">14x</span> &nbsp;&nbsp;&nbsp; <img src="https://www.google.com/s2/favicons?domain=toast.com&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:2px"><span style="font-weight:600;color:var(--ink2)">Toast</span> <span style="font-family:'DM Mono',monospace;color:var(--ink4);font-size:clamp(8px,1vh,11px)">7x</span></p>
+<div style="flex:1;overflow:auto;min-height:0;display:flex;flex-direction:column">
+<table style="width:100%;border-collapse:collapse;font-size:clamp(7px,.95vh,10px);table-layout:fixed;flex:1">
+<thead><tr>
+<th rowspan="2" style="text-align:left;padding:2px 5px;border-bottom:2px solid var(--rule);font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink4);width:28%;vertical-align:bottom;font-size:clamp(7px,.9vh,9px)">Prompt</th>
+<th colspan="5" style="text-align:center;padding:3px 0 1px;border-bottom:1px solid var(--rule);font-weight:700;color:var(--ink3);font-size:clamp(9px,1.2vh,13px)"><img src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:1px">ChatGPT</th>
+<th colspan="5" style="text-align:center;padding:3px 0 1px;border-bottom:1px solid var(--rule);font-weight:700;color:var(--ink3);font-size:clamp(9px,1.2vh,13px)"><img src="https://www.google.com/s2/favicons?domain=gemini.google.com&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:1px">Gemini</th>
+<th colspan="5" style="text-align:center;padding:3px 0 1px;border-bottom:1px solid var(--rule);font-weight:700;color:var(--ink3);font-size:clamp(9px,1.2vh,13px)"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:1px">AIO</th>
+<th colspan="5" style="text-align:center;padding:3px 0 1px;border-bottom:1px solid var(--rule);font-weight:700;color:var(--ink3);font-size:clamp(9px,1.2vh,13px)"><img src="https://www.google.com/s2/favicons?domain=google.com&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:1px">AI&nbsp;Mode</th>
+<th colspan="5" style="text-align:center;padding:3px 0 1px;border-bottom:1px solid var(--rule);font-weight:700;color:var(--ink3);font-size:clamp(9px,1.2vh,13px)"><img src="https://www.google.com/s2/favicons?domain=perplexity.ai&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:1px">Perplexity</th>
+</tr><tr>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:11px;height:11px" title="Zeal"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=squareup.com&sz=16" style="width:11px;height:11px" title="Square"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=clover.com&sz=16" style="width:11px;height:11px" title="Clover"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=lightspeedhq.com&sz=16" style="width:11px;height:11px" title="Lightspeed"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=toast.com&sz=16" style="width:11px;height:11px" title="Toast"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:11px;height:11px" title="Zeal"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=squareup.com&sz=16" style="width:11px;height:11px" title="Square"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=clover.com&sz=16" style="width:11px;height:11px" title="Clover"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=lightspeedhq.com&sz=16" style="width:11px;height:11px" title="Lightspeed"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=toast.com&sz=16" style="width:11px;height:11px" title="Toast"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:11px;height:11px" title="Zeal"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=squareup.com&sz=16" style="width:11px;height:11px" title="Square"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=clover.com&sz=16" style="width:11px;height:11px" title="Clover"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=lightspeedhq.com&sz=16" style="width:11px;height:11px" title="Lightspeed"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=toast.com&sz=16" style="width:11px;height:11px" title="Toast"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:11px;height:11px" title="Zeal"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=squareup.com&sz=16" style="width:11px;height:11px" title="Square"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=clover.com&sz=16" style="width:11px;height:11px" title="Clover"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=lightspeedhq.com&sz=16" style="width:11px;height:11px" title="Lightspeed"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=toast.com&sz=16" style="width:11px;height:11px" title="Toast"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:11px;height:11px" title="Zeal"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=squareup.com&sz=16" style="width:11px;height:11px" title="Square"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=clover.com&sz=16" style="width:11px;height:11px" title="Clover"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=lightspeedhq.com&sz=16" style="width:11px;height:11px" title="Lightspeed"></th>
+<th style="text-align:center;padding:2px 1px;border-bottom:2px solid var(--rule);"><img src="https://www.google.com/s2/favicons?domain=toast.com&sz=16" style="width:11px;height:11px" title="Toast"></th>
+</tr></thead><tbody>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">What software adds CRM features to payment terminals</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">Is there a way to connect loyalty rewards directly to card payments</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">Is there software that works with Ingenico or Android POS devices for loyalty</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">What tools can turn my card machine into a loyalty system</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">Best way to run a loyalty program without QR codes or downloads</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">How do I reward customers automatically after each purchase</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">What are the best tools for increasing customer lifetime value in retail</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">How can I personalize offers for customers in a physical shop</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">What solutions integrate loyalty programs into existing POS machines</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">Best fintech tools for improving in-store customer retention</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">How can I upgrade my payment terminals without buying new hardware</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">What platforms help brick-and-mortar stores understand customer behavior</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">How can I run a card-linked rewards program for my business</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">Are there POS systems that automatically identify returning customers</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">What are some alternatives to building a custom loyalty app for my store</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">How do I collect customer feedback at checkout automatically</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">How can small retailers use data like ecommerce companies do</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">How can I track customer behavior in a physical retail store without an app</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+<tr><td style="padding:1px 5px;border-bottom:1px solid var(--rule);color:var(--ink2);font-weight:500;font-size:clamp(9px,1.2vh,13px)">How can I increase repeat customers in my restaurant using payments data</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--ok-bg);color:var(--ok);font-weight:700;font-size:clamp(8px,1vh,11px)">&#x2713;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px);border-left:3px solid var(--rule)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+<td style="text-align:center;padding:0;background:var(--red-bg);color:var(--red);font-size:clamp(8px,1vh,11px)">&#x2715;</td>
+</tr>
+</tbody></table></div>
+<div style="margin-top:.6vh;padding:clamp(5px,.8vh,10px) clamp(10px,1.5vw,18px);background:var(--paper2);border:1px solid var(--rule);border-radius:6px;flex-shrink:0">
+<div style="display:flex;align-items:center;gap:clamp(8px,1.2vw,16px);flex-wrap:wrap">
+<span style="font-size:clamp(8px,1vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);white-space:nowrap">Other brands mentioned:</span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=shopify.com&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">Shopify</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">15x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=nector.io&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">Nector</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">6x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=yotpo.com&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">Yotpo</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">4x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=verifone.com&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">Verifone</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">4x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=salesforce.com&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">Salesforce</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">4x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=loyaltylion.com&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">LoyaltyLion</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">4x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=hubspot.com&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">HubSpot</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">3x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=stripe.com&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">Stripe</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">3x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=smile.io&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">Smile.io</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">3x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=ingenico.com&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">Ingenico</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">3x</span></span>
+<span style="display:inline-flex;align-items:center;gap:3px;font-size:clamp(8px,1.05vh,11px);color:var(--ink2);white-space:nowrap"><img src="https://www.google.com/s2/favicons?domain=stampme.com&sz=16" style="width:11px;height:11px;border-radius:2px"><span style="font-weight:600">Stamp Me</span><span style="font-family:'DM Mono',monospace;color:var(--ink4)">3x</span></span>
+</div></div>
+</div></section>
+<section><div class="s" style="padding:3.5vh 4.5vw 3vh">
+<div class="stripe"></div><div class="snum">05 / 07</div>
+<span class="tag">Citation Intelligence</span>
+<h2>Where AI Gets Its Answers <span style="color:var(--accent)">(Not From Zeal)</span></h2>
+<p class="sub" style="margin-bottom:1vh">These are the domains AI models cite when answering questions in Zeal's space. getzeal.io is not among them.</p>
+<div style="display:grid;grid-template-columns:1.1fr 0.9fr;gap:2.5vw;flex:1;min-height:0">
+  <div style="display:flex;flex-direction:column;min-height:0"><div style="flex:1;overflow-y:auto">
+<table style="width:100%;border-collapse:collapse">
+        <thead><tr>
+          <th style="text-align:left;padding:clamp(4px,.7vh,8px) 0;font-size:clamp(8px,1vh,11px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);border-bottom:2px solid var(--rule)">Domain</th>
+          <th style="text-align:center;padding:clamp(4px,.7vh,8px) 0;font-size:clamp(8px,1vh,11px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);border-bottom:2px solid var(--rule);width:60px">Cited</th>
+          <th style="text-align:left;padding:clamp(4px,.7vh,8px) 0 clamp(4px,.7vh,8px) 8px;font-size:clamp(8px,1vh,11px);font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink4);border-bottom:2px solid var(--rule)">AI Models</th>
+        </tr></thead>
+        <tbody style="font-size:clamp(11px,1.5vh,16px)">
+          <tr style="border-bottom:1px solid var(--rule)"><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=16" class="fav-sm"><strong>youtube.com</strong></td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;color:var(--accent)">29</td><td style="padding-left:8px"><span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AIO</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AI Mode</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">Perplexity</span></td></tr>
+          <tr style="border-bottom:1px solid var(--rule)"><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=stampme.com&sz=16" class="fav-sm"><strong>stampme.com</strong></td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;color:var(--accent)">26</td><td style="padding-left:8px"><span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">Gemini</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AIO</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AI Mode</span></td></tr>
+          <tr style="border-bottom:1px solid var(--rule)"><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=squareup.com&sz=16" class="fav-sm"><strong>squareup.com</strong></td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;color:var(--accent)">21</td><td style="padding-left:8px"><span class="pill pill-a" style="font-size:clamp(7px,.9vh,10px)">All 5 models</span></td></tr>
+          <tr style="border-bottom:1px solid var(--rule)"><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=reddit.com&sz=16" class="fav-sm"><strong>reddit.com</strong></td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;color:var(--accent)">20</td><td style="padding-left:8px"><span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">ChatGPT</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">Perplexity</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AIO</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AI Mode</span></td></tr>
+          <tr style="border-bottom:1px solid var(--rule)"><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=ingenico.com&sz=16" class="fav-sm">ingenico.com</td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:600;color:var(--accent-dark)">19</td><td style="padding-left:8px"><span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AIO</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AI Mode</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">Gemini</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">Perplexity</span></td></tr>
+          <tr style="border-bottom:1px solid var(--rule)"><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=storetech.com&sz=16" class="fav-sm">storetech.com</td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:600;color:var(--accent-dark)">18</td><td style="padding-left:8px"><span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AIO</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AI Mode</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">Gemini</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">ChatGPT</span></td></tr>
+          <tr style="border-bottom:1px solid var(--rule)"><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=shopify.com&sz=16" class="fav-sm"><strong>shopify.com</strong></td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:700;color:var(--accent)">16</td><td style="padding-left:8px"><span class="pill pill-a" style="font-size:clamp(7px,.9vh,10px)">All 5 models</span></td></tr>
+          <tr style="border-bottom:1px solid var(--rule)"><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=perkstar.co.uk&sz=16" class="fav-sm">perkstar.co.uk</td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:600;color:var(--accent-dark)">15</td><td style="padding-left:8px"><span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">Gemini</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AI Mode</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AIO</span></td></tr>
+          <tr style="border-bottom:1px solid var(--rule)"><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=eposnow.com&sz=16" class="fav-sm">eposnow.com</td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:600;color:var(--accent-dark)">14</td><td style="padding-left:8px"><span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AI Mode</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AIO</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">Gemini</span></td></tr>
+          <tr><td style="padding:clamp(7px,1.3vh,14px) 0"><img src="https://www.google.com/s2/favicons?domain=nector.io&sz=16" class="fav-sm">nector.io</td><td style="text-align:center;font-family:'DM Mono',monospace;font-weight:600;color:var(--accent-dark)">14</td><td style="padding-left:8px"><span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AI Mode</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">ChatGPT</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">AIO</span> <span class="pill pill-m" style="font-size:clamp(7px,.9vh,10px)">Gemini</span></td></tr>
+        </tbody>
+      </table></div></div>
+  <!-- Right panel -->
+  <div style="display:flex;flex-direction:column;gap:clamp(8px,1.2vh,14px)">
+    <div class="metrics m3" style="flex-shrink:0">
+      <div class="mc hi"><div class="ml">Domains Cited</div><div class="mv" style="font-size:clamp(24px,4.2vh,42px)">20</div></div>
+      <div class="mc"><div class="ml">Total Citations</div><div class="mv" style="font-size:clamp(24px,4.2vh,42px)">308</div></div>
+      <div class="mc lo"><div class="ml">getzeal.io</div><div class="mv" style="font-size:clamp(24px,4.2vh,42px)">0</div></div>
+    </div>
+    <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:6px;padding:clamp(8px,1.2vh,14px) clamp(10px,1.5vw,18px);flex-shrink:0">
+      <div style="font-size:clamp(8px,1vh,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink4);margin-bottom:6px">Source Types (308 citations)</div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:clamp(100px,15vw,170px);height:clamp(12px,2vh,20px);background:var(--accent);border-radius:3px;display:flex;align-items:center;justify-content:flex-end;padding-right:4px"><span style="font-family:'DM Mono',monospace;font-size:clamp(7px,.9vh,10px);color:#fff;font-weight:600">191</span></div><span style="font-size:clamp(8px,1.05vh,11px);color:var(--ink2);font-weight:500">Product Pages (62%)</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:clamp(23px,3.4vw,39px);height:clamp(12px,2vh,20px);background:var(--ink3);border-radius:3px"></div><span style="font-family:'DM Mono',monospace;font-size:clamp(7px,.9vh,10px);color:var(--ink3);font-weight:600">43</span><span style="font-size:clamp(8px,1.05vh,11px);color:var(--ink2);font-weight:500">Unattributed / Google AIO</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:clamp(15px,2.3vw,26px);height:clamp(12px,2vh,20px);background:var(--warn);border-radius:3px"></div><span style="font-family:'DM Mono',monospace;font-size:clamp(7px,.9vh,10px);color:var(--warn);font-weight:600">29</span><span style="font-size:clamp(8px,1.05vh,11px);color:var(--ink2);font-weight:500">Video / YouTube</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:clamp(11px,1.6vw,18px);height:clamp(12px,2vh,20px);background:var(--blue);border-radius:3px"></div><span style="font-family:'DM Mono',monospace;font-size:clamp(7px,.9vh,10px);color:var(--blue);font-weight:600">20</span><span style="font-size:clamp(8px,1.05vh,11px);color:var(--ink2);font-weight:500">Forums / Reddit</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:clamp(8px,1.2vw,14px);height:clamp(12px,2vh,20px);background:var(--ok);border-radius:3px"></div><span style="font-family:'DM Mono',monospace;font-size:clamp(7px,.9vh,10px);color:var(--ok);font-weight:600">15</span><span style="font-size:clamp(8px,1.05vh,11px);color:var(--ink2);font-weight:500">Blog / Editorial</span></div>
+        <div style="display:flex;align-items:center;gap:8px"><div style="width:clamp(5px,.8vw,9px);height:clamp(12px,2vh,20px);background:var(--ink4);border-radius:3px"></div><span style="font-family:'DM Mono',monospace;font-size:clamp(7px,.9vh,10px);color:var(--ink4);font-weight:600">10</span><span style="font-size:clamp(8px,1.05vh,11px);color:var(--ink2);font-weight:500">Social / LinkedIn</span></div>
+      </div>
+    </div>
+    <div class="co r" style="flex-shrink:0;font-size:clamp(11px,1.5vh,16px)"><strong>getzeal.io is not cited anywhere.</strong> 308 citations from 20 domains. None are Zeal. Without citable content, AI has nothing to reference.</div>
+    <div class="co a" style="flex-shrink:0;font-size:clamp(11px,1.5vh,16px)"><strong>squareup.com and shopify.com</strong> are cited across all 5 AI models. 62% of all citations point to product pages.</div>
+  </div>
+</div>
+</div></section>
+
+<section><div class="s" style="padding:3.5vh 4.5vw 3vh">
+<div class="stripe"></div><div class="snum">06 / 07</div>
+<span class="tag">Prompt Deep-Dive</span>
+<h2>The One Prompt Where <span style="color:var(--ok)">Zeal Wins</span></h2>
+<div style="flex:1;display:flex;flex-direction:column;min-height:0;gap:.8vh">
+<!-- User prompt bubble -->
+<div style="display:flex;align-items:flex-start;gap:10px;flex-shrink:0">
+  <div style="width:26px;height:26px;border-radius:50%;background:var(--paper3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px">&#x1f464;</div>
+  <div style="background:var(--paper3);border-radius:0 12px 12px 12px;padding:clamp(7px,1vh,12px) clamp(10px,1.4vw,16px);font-size:clamp(11px,1.5vh,15px);font-weight:600;color:var(--ink)">What software adds CRM features to payment terminals?</div>
+</div>
+<!-- AI response bubble -->
+<div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-height:0">
+  <div style="flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px">
+    <img src="https://www.google.com/s2/favicons?domain=chatgpt.com&sz=32" style="width:26px;height:26px;border-radius:50%">
+    <span style="font-size:clamp(7px,.9vh,10px);font-weight:700;color:var(--ink4)">ChatGPT</span>
+  </div>
+  <div style="background:var(--paper3);border:1px solid var(--rule);border-radius:0 12px 12px 12px;padding:clamp(7px,1vh,12px) clamp(10px,1.4vw,16px);flex:1;overflow-y:auto;font-size:clamp(10px,1.35vh,14px);line-height:1.5;color:var(--ink2)">
+    <p style="margin-bottom:.6vh">There isn't just one piece of software that "adds CRM to payment terminals" &mdash; it's usually done through POS systems with built-in CRM or CRM integrations layered onto payment terminals.</p>
+    <p style="font-weight:700;color:var(--ink);margin-bottom:.2vh">&#x1f9e9; 1. POS systems with built-in CRM</p>
+    <ul style="margin:0 0 .6vh 1.2em;padding:0;list-style:disc">
+      <li><span style="background:var(--warn-bg);border-radius:3px;padding:0 4px;font-weight:700;color:var(--warn)">Lightspeed POS</span> &mdash; tracks customer purchase history, segments customers, runs promotions</li>
+      <li><span style="background:var(--warn-bg);border-radius:3px;padding:0 4px;font-weight:700;color:var(--warn)">Clover POS</span> &mdash; integrates payments + customer profiles + loyalty tools</li>
+      <li><span style="background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:0 4px;font-weight:700;color:var(--ink3)">TouchBistro</span> &mdash; CRM + loyalty + tableside payment</li>
+      <li><span style="background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:0 4px;font-weight:700;color:var(--ink3)">Shopify POS</span> &mdash; syncs in-store payments with customer profiles</li>
+    </ul>
+    <p style="font-weight:700;color:var(--ink);margin-bottom:.2vh">&#x1f517; 2. CRM-integrated payment software</p>
+    <p style="margin-bottom:.6vh">Connect existing terminals to CRM via integrations. Payment data flows into CRM automatically.</p>
+    <p style="font-weight:700;color:var(--ink);margin-bottom:.2vh">&#x1f4f1; 3. Terminal-level CRM software</p>
+    <div style="background:var(--ok-bg);border:1.5px solid var(--ok-bd);border-radius:6px;padding:clamp(5px,.7vh,8px) clamp(8px,1.2vw,14px);margin:.4vh 0 .6vh">
+      <p style="margin:0;font-weight:600;color:var(--ok)"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:12px;height:12px;vertical-align:middle;margin-right:3px">Zeal &mdash; <span style="font-weight:500;color:var(--ink2)">installs on payment terminals to identify customers at checkout, run loyalty programmes, collect feedback, show customer profiles in real time.</span></p>
+    </div>
+    <p style="font-weight:700;color:var(--ink);margin-bottom:.2vh">&#x2601;&#xfe0f; 4. All-in-one POS + CRM + payments</p>
+    <ul style="margin:0 0 .6vh 1.2em;padding:0;list-style:disc">
+      <li><span style="background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:0 4px;font-weight:700;color:var(--ink3)">SpotOn</span> &mdash; POS, payments, CRM, loyalty, analytics</li>
+      <li><span style="background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:0 4px;font-weight:700;color:var(--ink3)">ConnectPOS</span> &mdash; centralises customer data, sales, automation</li>
+    </ul>
+    <p style="font-weight:700;color:var(--ink);margin-bottom:.2vh">&#x1f9ed; Quick way to choose</p>
+    <ul style="margin:0 0 .8vh 1.2em;padding:0;list-style:disc">
+      <li>Simplest setup? &rarr; <span style="background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:0 4px;font-weight:600;color:var(--ink3)">Shopify POS</span>, <span style="background:var(--warn-bg);border-radius:3px;padding:0 4px;font-weight:600;color:var(--warn)">Clover</span></li>
+      <li>Already have terminals? &rarr; Add CRM via integrations</li>
+      <li>CRM directly on the terminal? &rarr; <span style="background:var(--ok-bg);border-radius:3px;padding:0 4px;font-weight:700;color:var(--ok)">Zeal</span></li>
+      <li>Multi-location? &rarr; <span style="background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:0 4px;font-weight:600;color:var(--ink3)">SpotOn</span>, <span style="background:var(--paper2);border:1px solid var(--rule);border-radius:3px;padding:0 4px;font-weight:600;color:var(--ink3)">ConnectPOS</span></li>
+    </ul>
+    <!-- Sources and brands INSIDE the bubble -->
+    <div style="padding-top:.6vh;border-top:1px solid var(--rule)">
+      <p style="margin-bottom:.3vh"><span style="font-size:clamp(7px,.9vh,10px);font-weight:700;color:var(--ink4);letter-spacing:.05em;text-transform:uppercase">Sources:</span>
+        <span style="font-size:clamp(7px,.9vh,10px);color:var(--ink3)"><img src="https://www.google.com/s2/favicons?domain=shopify.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> shopify.com &nbsp;</span>
+        <span style="font-size:clamp(7px,.9vh,10px);color:var(--ink3)"><img src="https://www.google.com/s2/favicons?domain=businessnewsdaily.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> businessnewsdaily.com &nbsp;</span>
+        <span style="font-size:clamp(7px,.9vh,10px);color:var(--ink3)"><img src="https://www.google.com/s2/favicons?domain=connectpos.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> connectpos.com &nbsp;</span>
+        <span style="font-size:clamp(7px,.9vh,10px);color:var(--ink3)"><img src="https://www.google.com/s2/favicons?domain=f6s.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> f6s.com &nbsp;</span>
+        <span style="font-size:clamp(7px,.9vh,10px);color:var(--ink3)"><img src="https://www.google.com/s2/favicons?domain=commercetech.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> commercetech.com</span>
+      </p>
+      <p style="margin:0"><span style="font-size:clamp(7px,.9vh,10px);font-weight:700;color:var(--ink4);letter-spacing:.05em;text-transform:uppercase">Brands mentioned:</span>
+        <span style="font-size:clamp(8px,1vh,11px)"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:10px;height:10px;vertical-align:middle"> <strong style="color:var(--ok)">Zeal</strong> &middot; <img src="https://www.google.com/s2/favicons?domain=lightspeedhq.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> <strong style="color:var(--warn)">Lightspeed</strong> &middot; <img src="https://www.google.com/s2/favicons?domain=clover.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> <strong style="color:var(--warn)">Clover</strong> &middot; <img src="https://www.google.com/s2/favicons?domain=shopify.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> Shopify &middot; <img src="https://www.google.com/s2/favicons?domain=spoton.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> SpotOn &middot; <img src="https://www.google.com/s2/favicons?domain=connectpos.com&sz=16" style="width:10px;height:10px;vertical-align:middle"> ConnectPOS &middot; TouchBistro</span>
+      </p>
+    </div>
+  </div>
+</div>
+<!-- Other AI model cards - bigger -->
+<div style="display:flex;align-items:center;gap:clamp(8px,1.2vw,14px);flex-shrink:0;padding:clamp(4px,.6vh,8px) 0"><div style="font-size:clamp(10px,1.3vh,14px);color:var(--ink2);line-height:1.4"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:13px;height:13px;vertical-align:middle;margin-right:3px"><strong style="color:var(--ok)">Zeal was ranked #3</strong> in ChatGPT's response, sourced from <img src="https://www.google.com/s2/favicons?domain=f6s.com&sz=16" style="width:11px;height:11px;vertical-align:middle;margin:0 2px"><strong>f6s.com</strong>. For the same prompt, the other 4 AI models did not mention Zeal at all:</div></div>
+<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(6px,1vw,12px);flex-shrink:0;margin-top:-.3vh">
+  <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:8px;padding:clamp(8px,1.1vh,12px) clamp(8px,1.2vw,14px);display:flex;align-items:center;gap:8px">
+    <img src="https://www.google.com/s2/favicons?domain=gemini.google.com&sz=32" style="width:28px;height:28px;border-radius:6px;flex-shrink:0">
+    <div><div style="font-size:clamp(10px,1.3vh,14px);font-weight:700;color:var(--ink2)">Gemini</div><div style="font-family:'DM Mono',monospace;font-size:clamp(20px,3.2vh,32px);font-weight:600;color:var(--red);line-height:1.1">0</div><div style="font-size:clamp(8px,1vh,11px);color:var(--ink4)">Same prompt, Zeal absent</div></div>
+  </div>
+  <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:8px;padding:clamp(8px,1.1vh,12px) clamp(8px,1.2vw,14px);display:flex;align-items:center;gap:8px">
+    <img src="https://www.google.com/s2/favicons?domain=google.com&sz=32" style="width:28px;height:28px;border-radius:6px;flex-shrink:0">
+    <div><div style="font-size:clamp(10px,1.3vh,14px);font-weight:700;color:var(--ink2)">Google AIO</div><div style="font-family:'DM Mono',monospace;font-size:clamp(20px,3.2vh,32px);font-weight:600;color:var(--red);line-height:1.1">0</div><div style="font-size:clamp(8px,1vh,11px);color:var(--ink4)">Same prompt, Zeal absent</div></div>
+  </div>
+  <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:8px;padding:clamp(8px,1.1vh,12px) clamp(8px,1.2vw,14px);display:flex;align-items:center;gap:8px">
+    <img src="https://www.google.com/s2/favicons?domain=google.com&sz=32" style="width:28px;height:28px;border-radius:6px;flex-shrink:0">
+    <div><div style="font-size:clamp(10px,1.3vh,14px);font-weight:700;color:var(--ink2)">AI Mode</div><div style="font-family:'DM Mono',monospace;font-size:clamp(20px,3.2vh,32px);font-weight:600;color:var(--red);line-height:1.1">0</div><div style="font-size:clamp(8px,1vh,11px);color:var(--ink4)">Same prompt, Zeal absent</div></div>
+  </div>
+  <div style="background:var(--red-bg);border:1px solid var(--red-bd);border-radius:8px;padding:clamp(8px,1.1vh,12px) clamp(8px,1.2vw,14px);display:flex;align-items:center;gap:8px">
+    <img src="https://www.google.com/s2/favicons?domain=perplexity.ai&sz=32" style="width:28px;height:28px;border-radius:6px;flex-shrink:0">
+    <div><div style="font-size:clamp(10px,1.3vh,14px);font-weight:700;color:var(--ink2)">Perplexity</div><div style="font-family:'DM Mono',monospace;font-size:clamp(20px,3.2vh,32px);font-weight:600;color:var(--red);line-height:1.1">0</div><div style="font-size:clamp(8px,1vh,11px);color:var(--ink4)">Same prompt, Zeal absent</div></div>
+  </div>
+</div>
+</div>
+</div></section>
+
+<section><div class="s" style="padding:3.5vh 4.5vw 3vh">
+<div class="stripe"></div><div class="snum">07 / 07</div>
+<span class="tag">What To Do Next</span>
+<h2>What You Should Do to Improve <span style="color:var(--accent)">Your AI Visibility</span></h2>
+<p class="sub" style="margin-bottom:1.5vh">Each action targets specific gaps from the data. Ordered by speed of impact.</p>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(8px,1.2vw,16px)">
+  <!-- Card 1 -->
+  <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:clamp(12px,1.8vh,20px) clamp(12px,1.6vw,18px);display:flex;flex-direction:column">
+    <div style="font-family:'DM Mono',monospace;font-size:clamp(22px,3.5vh,38px);font-weight:400;color:var(--red);margin-bottom:.6vh">01</div>
+    <h4 style="font-size:clamp(13px,1.9vh,18px);margin-bottom:.8vh;line-height:1.2"><img src="https://www.google.com/s2/favicons?domain=getzeal.io&sz=16" style="width:14px;height:14px;vertical-align:middle;margin-right:4px">Publish a Product Page on Card-Linked Loyalty</h4>
+    <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:clamp(4px,.7vh,8px)">
+      <li style="font-size:clamp(11px,1.5vh,15px);color:var(--ink3);line-height:1.4;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#x203a;</span>Create a dedicated <strong style="color:var(--ink2)">product page</strong> (like Square's <em>"Customer Loyalty Programme Software"</em> page, cited 6x by AI)</li>
+      <li style="font-size:clamp(11px,1.5vh,15px);color:var(--ink3);line-height:1.4;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#x203a;</span>Explain what card-linked loyalty is, how Zeal installs on terminals, who it's for, and pricing</li>
+      <li style="font-size:clamp(11px,1.5vh,15px);color:var(--ink3);line-height:1.4;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#x203a;</span>Add <strong style="color:var(--ink2)">FAQ schema</strong> so AI can extract structured answers directly</li>
+      <li style="font-size:clamp(11px,1.5vh,15px);color:var(--ink3);line-height:1.4;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#x203a;</span>Targets the 3 prompts where Zeal already appears, gives all 5 models a source to cite</li>
+    </ul>
+    <div style="padding-top:.8vh;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:clamp(9px,1.1vh,12px);color:var(--ink4)"><span>Impact: <strong style="color:var(--ok)">+3 prompts</strong></span><span>Effort: <strong>1 week</strong></span></div>
+  </div>
+  <!-- Card 2 -->
+  <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:clamp(12px,1.8vh,20px) clamp(12px,1.6vw,18px);display:flex;flex-direction:column">
+    <div style="font-family:'DM Mono',monospace;font-size:clamp(22px,3.5vh,38px);font-weight:400;color:var(--warn);margin-bottom:.6vh">02</div>
+    <h4 style="font-size:clamp(13px,1.9vh,18px);margin-bottom:.8vh;line-height:1.2"><img src="https://www.google.com/s2/favicons?domain=reddit.com&sz=16" style="width:14px;height:14px;vertical-align:middle;margin-right:2px"><img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=16" style="width:14px;height:14px;vertical-align:middle;margin-right:4px">Get on Reddit and YouTube</h4>
+    <ul style="list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:clamp(4px,.7vh,8px)">
+      <li style="font-size:clamp(11px,1.5vh,15px);color:var(--ink3);line-height:1.4;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#x203a;</span><img src="https://www.google.com/s2/favicons?domain=reddit.com&sz=16" style="width:11px;height:11px;vertical-align:middle;margin-right:3px"><strong style="color:var(--ink2)">Reddit</strong> (20 citations, 4 models): post genuine answers in r/smallbusiness and r/POS about card-linked loyalty</li>
+      <li style="font-size:clamp(11px,1.5vh,15px);color:var(--ink3);line-height:1.4;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#x203a;</span><img src="https://www.google.com/s2/favicons?domain=youtube.com&sz=16" style="width:11px;height:11px;vertical-align:middle;margin-right:3px"><strong style="color:var(--ink2)">YouTube</strong> (29 citations, 3 models): record a 3-min explainer like PassKit's video (cited 5x by AI)</li>
+      <li style="font-size:clamp(11px,1.5vh,15px);color:var(--ink3);line-height:1.4;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#x203a;</span>Perplexity and Google AI Mode pick up Reddit/YouTube within days</li>
+      <li style="font-size:clamp(11px,1.5vh,15px);color:var(--ink3);line-height:1.4;padding-left:14px;position:relative"><span style="position:absolute;left:0;color:var(--accent)">&#x203a;</span>Title format that works: "How To [do X] With [product]" (matches most-cited YouTube content)</li>
+    </ul>
+    <div style="padding-top:.8vh;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:clamp(9px,1.1vh,12px);color:var(--ink4)"><span>Impact: <strong style="color:var(--ok)">+2 platforms</strong></span><span>Effort: <strong>3 days</strong></span></div>
+  </div>
+  <!-- Card 3 -->
+  <div style="background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:clamp(12px,1.8vh,20px) clamp(12px,1.6vw,18px);display:flex;flex-direction:column">
+    <div style="font-family:'DM Mono',monospace;font-size:clamp(22px,3.5vh,38px);font-weight:400;color:var(--accent);margin-bottom:.6vh">03</div>
+    <h4 style="font-size:clamp(13px,1.9vh,18px);margin-bottom:.8vh;line-height:1.2">&#x270d;&#xfe0f; Write 3 Blog Posts Targeting Zero-Score Prompts</h4>
+    <div style="display:flex;flex-direction:column;gap:clamp(4px,.7vh,8px)">
+      <div style="font-size:clamp(11px,1.5vh,15px);color:var(--ink2);padding:clamp(4px,.5vh,6px) clamp(6px,.8vw,10px);background:var(--paper);border:1px solid var(--rule);border-radius:4px;line-height:1.3"><strong>Listicle:</strong> "Best Loyalty Software for Restaurants 2026"<br><span style="color:var(--ink4);font-size:clamp(9px,1.1vh,11px)">Format used by Opia (cited 4x), Perkstar (cited 5x), Nector (cited 4x)</span></div>
+      <div style="font-size:clamp(11px,1.5vh,15px);color:var(--ink2);padding:clamp(4px,.5vh,6px) clamp(6px,.8vw,10px);background:var(--paper);border:1px solid var(--rule);border-radius:4px;line-height:1.3"><strong>How-To Guide:</strong> "How to Run a Loyalty Program Without QR Codes"<br><span style="color:var(--ink4);font-size:clamp(9px,1.1vh,11px)">Format used by Epos Now (cited 3x), Endava (cited 4x)</span></div>
+      <div style="font-size:clamp(11px,1.5vh,15px);color:var(--ink2);padding:clamp(4px,.5vh,6px) clamp(6px,.8vw,10px);background:var(--paper);border:1px solid var(--rule);border-radius:4px;line-height:1.3"><strong>Integration Guide:</strong> "Integrating Loyalty With Payment Terminals"<br><span style="color:var(--ink4);font-size:clamp(9px,1.1vh,11px)">Format used by Endava (cited 4x), Mastercard (cited 4x)</span></div>
+    </div>
+    <div style="padding-top:.8vh;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:clamp(9px,1.1vh,12px);color:var(--ink4)"><span>Impact: <strong style="color:var(--ok)">+5 prompts</strong></span><span>Effort: <strong>3 weeks</strong></span></div>
+  </div>
+</div>
+</div></section>
+</div></div><script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/5.1.0/reveal.min.js"></script><script>Reveal.initialize({hash:true,transition:"slide",transitionSpeed:"fast",controls:true,progress:true,slideNumber:"c/t",disableLayout:true});</script></body></html>
