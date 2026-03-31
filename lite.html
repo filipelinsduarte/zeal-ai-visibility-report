@@ -118,82 +118,144 @@ html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#
 
 /* ── MOBILE OPTIMIZATIONS ── */
 @media (max-width: 768px) {
-  .s { padding: 3vh 4vw 3vh !important; }
-  .reveal h1 { font-size: 28px !important; white-space: normal !important; }
-  .reveal h2 { font-size: 20px !important; margin-bottom: 1.5vh !important; }
-  .snum { font-size: 9px !important; top: 2vh !important; right: 3vw !important; }
-  .tag { font-size: 8px !important; padding: 2px 6px !important; }
+  /* Core slide layout */
+  .reveal .slides section { overflow-y: auto !important; overflow-x: hidden !important; }
+  .s { padding: 16px 16px 16px 20px !important; gap: 0 !important; }
+  .stripe { width: 4px !important; }
+  .snum { font-size: 9px !important; top: 12px !important; right: 12px !important; }
+  .tag { font-size: 8px !important; padding: 2px 6px !important; margin-bottom: 6px !important; }
   
-  /* Stack 3-col metric grids to 1 col */
-  .metrics.m3, .metrics.m4, .metrics.m5 { grid-template-columns: 1fr !important; gap: 6px !important; }
-  .mc { padding: 10px 12px !important; }
-  .mc .mv { font-size: 28px !important; }
-  .mc .ml { font-size: 9px !important; }
+  /* Typography */
+  .reveal h1 { font-size: 24px !important; white-space: normal !important; line-height: 1.2 !important; margin-bottom: 8px !important; }
+  .reveal h2 { font-size: 18px !important; margin-bottom: 8px !important; line-height: 1.2 !important; }
+  .sub, p.sub, [class="sub"] { font-size: 12px !important; line-height: 1.4 !important; }
+  
+  /* All grids: force single column */
+  .metrics.m3, .metrics.m4, .metrics.m5,
+  [style*="grid-template-columns:repeat(3,1fr)"],
+  [style*="grid-template-columns: repeat(3,1fr)"],
+  [style*="grid-template-columns:1fr 1fr"],
+  [style*="grid-template-columns: 1fr 1fr"] {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    gap: 6px !important;
+  }
+  
+  /* Metric cards compact */
+  .mc { padding: 8px 10px !important; flex-direction: row !important; align-items: center !important; gap: 8px !important; }
+  .mc .mv { font-size: 24px !important; min-width: 60px !important; }
+  .mc .ml { font-size: 8px !important; }
   .mc .md { font-size: 10px !important; }
   
-  /* Stack 2-col grids */
-  .two { grid-template-columns: 1fr !important; gap: 12px !important; }
+  /* Two-column layouts: stack */
+  .two, [style*="grid-template-columns:1.1fr 0.9fr"],
+  [style*="grid-template-columns:1.2fr 0.8fr"],
+  [style*="grid-template-columns:auto 1fr"] {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
   
-  /* Competitor table: make scrollable */
-  table { font-size: 10px !important; }
-  table th, table td { padding: 5px 4px !important; font-size: 10px !important; }
+  /* Tables */
+  table { font-size: 9px !important; }
+  table th { font-size: 8px !important; padding: 4px 3px !important; }
+  table td { font-size: 9px !important; padding: 4px 3px !important; }
+  table img { width: 12px !important; height: 12px !important; margin-right: 3px !important; }
   
-  /* Heatmap: horizontal scroll */
-  .heatmap { overflow-x: auto !important; }
+  /* Table containers: allow horizontal scroll */
+  div[style*="overflow-y:auto"], div[style*="overflow:auto"] {
+    overflow: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+  
+  /* Heatmap specific: force scroll */
+  table[style*="table-layout:fixed"] {
+    min-width: 600px !important;
+  }
   
   /* Bar charts */
-  .hbar { grid-template-columns: 80px 1fr auto !important; }
-  .hbar-label { font-size: 11px !important; }
-  .hbar-val { font-size: 12px !important; }
+  .hbar { grid-template-columns: 70px 1fr 30px !important; gap: 6px !important; padding: 6px 0 !important; }
+  .hbar-label { font-size: 10px !important; }
+  .hbar-label img { width: 14px !important; height: 14px !important; }
+  .hbar-val { font-size: 11px !important; }
+  .hbar-track { height: 16px !important; }
   
-  /* Action cards: stack to 1 col */
-  [style*="grid-template-columns:repeat(3,1fr)"] { grid-template-columns: 1fr !important; gap: 8px !important; }
-  [style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: 1fr 1fr !important; gap: 6px !important; }
+  /* Donut chart */
+  [style*="border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;background:conic-gradient"] {
+    width: 100px !important;
+    height: 100px !important;
+  }
+  
+  /* Callouts */
+  .co { font-size: 11px !important; padding: 8px 10px !important; line-height: 1.4 !important; }
+  
+  /* Source rows */
+  .srow, [class*="srow"] { font-size: 10px !important; }
+  
+  /* Action cards */
+  .acard, [style*="background:var(--paper2);border:1px solid var(--rule);border-radius:8px;padding:clamp(12px"] {
+    padding: 10px 12px !important;
+  }
   
   /* CTA buttons */
-  [style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; gap: 8px !important; }
+  a[style*="border:2px solid var(--accent)"] {
+    padding: 12px 16px !important;
+  }
+  a[style*="border:2px solid var(--accent)"] div {
+    font-size: 16px !important;
+  }
   
-  /* Founders cards: stack */
-  [style*="grid-template-columns:1fr 1fr;gap:clamp(12px,2vw,24px)"] { grid-template-columns: 1fr !important; }
+  /* Founder cards */
+  img[style*="border-radius:50%;object-fit:cover"] {
+    width: 40px !important;
+    height: 40px !important;
+  }
   
-  /* Donut chart section */
-  [style*="grid-template-columns:auto 1fr"] { grid-template-columns: 1fr !important; gap: 12px !important; }
+  /* Other brands row at bottom */
+  [style*="flex-wrap:wrap"] span { font-size: 10px !important; }
   
-  /* Chat windows in deep-dive: stack */
-  [style*="grid-template-columns:repeat(3,1fr);gap:clamp(5px"] { grid-template-columns: 1fr !important; }
+  /* Competitor table Zeal highlight row */
+  tr[style*="border-top:3px solid var(--accent)"] td { padding: 6px 4px !important; }
   
-  /* Source type bars */
-  .co { font-size: 11px !important; padding: 8px 10px !important; }
+  /* Note under competitor table */
+  [style*="border-top:1px solid var(--rule);margin-top"] p { font-size: 10px !important; }
   
-  /* Footer bar */
-  [style*="display:flex;gap:0;border-top:1px solid var(--rule)"] { flex-wrap: wrap !important; gap: 8px !important; }
+  /* Slide 1 specific: stack the stat cards row + Zeal table */
+  [style*="margin-top:2.5vh;border:2px solid var(--accent)"] { margin-top: 12px !important; }
+  [style*="margin-top:2.5vh;border:2px solid var(--accent)"] table td,
+  [style*="margin-top:2.5vh;border:2px solid var(--accent)"] table th { 
+    padding: 6px 6px !important; 
+    font-size: 11px !important; 
+  }
   
-  /* Slide overflow: allow scrolling on mobile */
-  .reveal .slides section { overflow-y: auto !important; }
+  /* Source type bar chart on citations slide */
+  [style*="width:clamp(100px,15vw,170px)"] { width: 80px !important; }
+  
+  /* Pagination badge */
+  [style*="font-family:'DM Mono',monospace;font-size:clamp(9px,1.1vh,12px);color:var(--ink4);background:var(--paper2)"] {
+    font-size: 8px !important;
+    padding: 2px 6px !important;
+  }
+  
+  /* Fix flex containers that use vh for margins */
+  [style*="margin-top:2.5vh"] { margin-top: 10px !important; }
+  [style*="margin-top:3vh"] { margin-top: 12px !important; }
+  [style*="gap:clamp(8px,1.2vh,14px)"] { gap: 6px !important; }
+  [style*="gap:clamp(10px,1.5vh,18px)"] { gap: 8px !important; }
 }
 
 @media (max-width: 480px) {
-  .s { padding: 2vh 3vw 2vh !important; }
-  .reveal h1 { font-size: 22px !important; }
-  .reveal h2 { font-size: 17px !important; }
-  .mc .mv { font-size: 24px !important; }
-  .stripe { width: 3px !important; }
-  
-  /* Heatmap: smaller cells */
+  .s { padding: 12px 12px 12px 16px !important; }
+  .reveal h1 { font-size: 20px !important; }
+  .reveal h2 { font-size: 16px !important; }
+  .mc .mv { font-size: 20px !important; }
+  table { font-size: 8px !important; }
   table th, table td { padding: 3px 2px !important; font-size: 8px !important; }
   table img { width: 10px !important; height: 10px !important; }
-  
-  /* Other brands row: smaller */
-  [style*="flex-wrap:wrap"] { gap: 4px 8px !important; }
-  
-  /* Competitor table pagination badge */
-  [style*="font-family:'DM Mono',monospace;font-size:clamp(9px"] { font-size: 8px !important; }
-}
-
-/* Ensure tables scroll horizontally on small screens */
-@media (max-width: 768px) {
-  div[style*="overflow-y:auto"] { overflow: auto !important; }
-  div[style*="overflow:auto"] { -webkit-overflow-scrolling: touch; }
+  .hbar { grid-template-columns: 55px 1fr 25px !important; }
+  .hbar-label { font-size: 9px !important; }
+  .co { font-size: 10px !important; }
+  a[style*="border:2px solid var(--accent)"] div { font-size: 14px !important; }
 }
 
 </style>
